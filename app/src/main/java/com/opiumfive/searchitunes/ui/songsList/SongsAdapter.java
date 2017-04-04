@@ -1,58 +1,56 @@
-package com.opiumfive.searchitunes;
+package com.opiumfive.searchitunes.ui.songsList;
+
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.opiumfive.searchitunes.R;
+import com.opiumfive.searchitunes.model.Song;
+import com.opiumfive.searchitunes.ui.songDetail.DetailActivity;
 import com.squareup.picasso.Picasso;
-
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by allsw on 14.07.2016.
- */
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ItemViewHolder>{
+public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ItemViewHolder>{
 
-    List<Result> results;
-    Context mContext;
+    private List<Song> results = new ArrayList<>();
+    private Context mContext;
 
-    public RecyclerViewAdapter(Context c, List<Result> r) {
+    public SongsAdapter(Context c) {
         mContext = c;
-        results = r;
     }
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout, parent, false);
-        ItemViewHolder cvh = new ItemViewHolder(v);
-        return cvh;
+        return new ItemViewHolder(v);
+    }
+
+    public void updateItems(List<Song> songs) {
+        results.clear();
+        results.addAll(songs);
+        notifyDataSetChanged();
     }
 
     @Override
-    public void onBindViewHolder(ItemViewHolder holder, final int i) {
-        holder.artist.setText(results.get(i).getArtistName().toString());
+    public void onBindViewHolder(ItemViewHolder holder, int i) {
+        final Song item = results.get(i);
 
-        holder.song.setText(results.get(i).getTrackName().toString());
-
+        holder.artist.setText(item.getArtistName());
+        holder.song.setText(item.getTrackName());
         Picasso.with(mContext).load(results.get(i).getArtworkUrl100()).into(holder.imageView);
-        holder.imageView.setOnClickListener(new View.OnClickListener() {
+        holder.rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, DetailActivity.class);
-                intent.putExtra("artwork_url", results.get(i).getArtworkUrl100());
-                intent.putExtra("audio_url", results.get(i).getPreviewUrl());
-                intent.putExtra("artist", results.get(i).getArtistName());
-                intent.putExtra("song", results.get(i).getTrackName());
-                intent.putExtra("song_length", results.get(i).getTrackTimeMillis().toString());
+                intent.putExtra("song", item);
                 mContext.startActivity(intent);
             }
         });
@@ -60,26 +58,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        return results.size();
+        return results == null ? 0 : results.size();
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
-        CardView cv;
 
+        View rootView;
+        CardView cv;
         TextView artist;
         TextView song;
         ImageView imageView;
 
-
         public ItemViewHolder(View itemView) {
             super(itemView);
+            rootView = itemView;
             cv = (CardView) itemView.findViewById(R.id.cardView);
-
             artist = (TextView) itemView.findViewById(R.id.cv_artist_name);
-
             song = (TextView) itemView.findViewById(R.id.cv_song);
             imageView = (ImageView) itemView.findViewById(R.id.imageView);
-
         }
     }
 }

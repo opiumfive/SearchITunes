@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Search iTunes</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="min_query_warning">Минимальный запрос - 5 символов</string>
+    <string name="some_error">Упс. Возникла какая-то ошибка.</string>
+    <string name="please_wait">Пожалуйста, подождите</string>
 </resources>
