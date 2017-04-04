@@ -1,7 +1,6 @@
 package com.opiumfive.searchitunes.ui.songDetail;
 
 
-import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -23,7 +22,9 @@ import java.io.IOException;
 public class PlayerFragment extends Fragment implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
 
-    private Button button;
+    private static final String ARGUMENT_SONG_KEY = "key_song";
+
+    private Button mButton;
     private MediaPlayer mMediaPlayer;
     private Song mSong;
     private SeekBar mSeekBar;
@@ -31,13 +32,18 @@ public class PlayerFragment extends Fragment implements
     public PlayerFragment() {
     }
 
-    public static PlayerFragment newInstance() {
-        return new PlayerFragment();
+    public static PlayerFragment newInstance(Song song) {
+        PlayerFragment fragment = new PlayerFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(ARGUMENT_SONG_KEY, song);
+        fragment.setArguments(arguments);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSong = getArguments().getParcelable(ARGUMENT_SONG_KEY);
         setRetainInstance(true);
     }
 
@@ -78,30 +84,25 @@ public class PlayerFragment extends Fragment implements
             }
         });
 
-        Intent intent = getActivity().getIntent();
-        if (intent != null) {
-            mSong = intent.getParcelableExtra("song");
-            if (mSong != null) {
-                mSeekBar.setMax(mSong.getTrackTimeMillis() / 10000);
-                button = (Button) v.findViewById(R.id.button);
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (button.getText().toString().equals("Старт")) {
-                            releaseMP();
-                            startMusic(mSong.getPreviewUrl());
-                            button.setText("Пауза");
-                        } else {
-                            button.setText("Старт");
-                            if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
-                        }
-                    }
-                });
-                Picasso.with(getActivity()).load(mSong.getArtworkUrl100()).into(imageView);
-                songText.setText(mSong.getTrackName());
-                artistText.setText(mSong.getArtistName());
+        mSeekBar.setMax(mSong.getTrackTimeMillis() / 10000);
+        mButton = (Button) v.findViewById(R.id.button);
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mButton.getText().toString().equals("Старт")) {
+                    releaseMP();
+                    startMusic(mSong.getPreviewUrl());
+                    mButton.setText("Пауза");
+                } else {
+                    mButton.setText("Старт");
+                    if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.pause();
+                }
             }
-        }
+        });
+        Picasso.with(getActivity()).load(mSong.getArtworkUrl100()).into(imageView);
+        songText.setText(mSong.getTrackName());
+        artistText.setText(mSong.getArtistName());
+
 
         return v;
     }
@@ -116,7 +117,6 @@ public class PlayerFragment extends Fragment implements
             if (mMediaPlayer == null) return;
             mMediaPlayer.setLooping(false);
             mMediaPlayer.setOnCompletionListener(this);
-
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -125,8 +125,14 @@ public class PlayerFragment extends Fragment implements
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        button.setText("Старт");
+        mButton.setText("Старт");
         mSeekBar.setProgress(0);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        releaseMP();
     }
 
     @Override
@@ -137,7 +143,7 @@ public class PlayerFragment extends Fragment implements
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(mMediaPlayer != null){
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()){
                     int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000;
                     mSeekBar.setProgress(mCurrentPosition);
                 }

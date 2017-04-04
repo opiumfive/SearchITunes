@@ -26,6 +26,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".ui.songDetail.DetailActivity" />
+
     </application>
 
 </manifest>

@@ -61,7 +61,11 @@ public class Songs implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(results == null ? 0 : results.size());
-        for (Song item: results) parcel.writeParcelable(item, i);
+        if (results != null) {
+            parcel.writeInt(results.size());
+            for (Song item : results) parcel.writeParcelable(item, i);
+        } else {
+            parcel.writeInt(0);
+        }
     }
 }

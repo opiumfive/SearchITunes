@@ -4,6 +4,7 @@ package com.opiumfive.searchitunes.ui;
 import android.app.ProgressDialog;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import com.opiumfive.searchitunes.R;
 
@@ -27,6 +28,17 @@ public class BaseActivity extends AppCompatActivity {
             mProgressDialog.setCancelable(false);
         }
         mProgressDialog.show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     protected void removeProgress() {

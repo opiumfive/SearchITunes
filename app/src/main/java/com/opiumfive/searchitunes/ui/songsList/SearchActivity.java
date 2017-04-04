@@ -25,6 +25,7 @@ import retrofit2.Response;
 public class SearchActivity extends BaseActivity implements Callback<Songs> {
 
     private static final int MIN_QUERY_LENGTH = 5;
+    private static final int SPAN_LIST = 1;
     private static final int SPAN_PORTRAIT = 2;
     private static final int SPAN_LANDSCAPE = 3;
     private static final String SAVE_INSTANCE_KEY = "key_array";
@@ -47,6 +48,8 @@ public class SearchActivity extends BaseActivity implements Callback<Songs> {
         mToggleButton = (Switch) findViewById(R.id.switch1);
         mSongsRecyclerView = (RecyclerView) findViewById(R.id.rv);
         mSongsRecyclerView.setHasFixedSize(true);
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation != Configuration.ORIENTATION_PORTRAIT) mSpanNumber = SPAN_LANDSCAPE;
         mLayoutManager = new StaggeredGridLayoutManager(mSpanNumber,StaggeredGridLayoutManager.VERTICAL);
         mSongsRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -61,14 +64,10 @@ public class SearchActivity extends BaseActivity implements Callback<Songs> {
             }
         }
 
-        if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
-            mSpanNumber = SPAN_LANDSCAPE;
-        }
-
         mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                mLayoutManager.setSpanCount(mLayoutManager.getSpanCount() == mSpanNumber ? 1 : mSpanNumber);
+                mLayoutManager.setSpanCount(mLayoutManager.getSpanCount() == mSpanNumber ? SPAN_LIST : mSpanNumber);
                 mSongsRecyclerView.requestLayout();
             }
         });
