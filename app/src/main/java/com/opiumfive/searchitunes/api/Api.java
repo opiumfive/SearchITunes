@@ -15,6 +15,7 @@ public class Api {
     private static volatile IApi mApiServiceInstance;
 
     // making quick lazy retrofit singleton with Double Checked Locking & volatile
+    // volatile is recommended but not necessary since java 5
     public static IApi getApiService() {
         IApi localInstance = mApiServiceInstance;
         if (localInstance == null) {

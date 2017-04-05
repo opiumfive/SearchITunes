@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ItemViewHolder>{
+public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ItemViewHolder> {
+
+    public static final String EXTRA_KEY_SONG = "extra_song";
 
     private List<Song> results = new ArrayList<>();
     private Context mContext;
@@ -35,7 +37,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ItemViewHold
 
     public void updateItems(List<Song> songs) {
         results.clear();
-        results.addAll(songs);
+        if (songs != null) results.addAll(songs);
         notifyDataSetChanged();
     }
 
@@ -50,7 +52,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ItemViewHold
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, DetailActivity.class);
-                intent.putExtra("song", item);
+                intent.putExtra(EXTRA_KEY_SONG, item);
                 mContext.startActivity(intent);
             }
         });

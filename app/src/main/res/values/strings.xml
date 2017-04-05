@@ -3,4 +3,9 @@
     <string name="min_query_warning">Минимальный запрос - 5 символов</string>
     <string name="some_error">Упс. Возникла какая-то ошибка.</string>
     <string name="please_wait">Пожалуйста, подождите</string>
+    <string name="empty">Список пуст</string>
+    <string name="start">Старт</string>
+    <string name="pause">Пауза</string>
+    <string name="as_list">Список</string>
+    <string name="as_table">Таблица</string>
 </resources>

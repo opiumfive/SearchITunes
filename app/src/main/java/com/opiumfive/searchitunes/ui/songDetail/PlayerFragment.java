@@ -28,6 +28,8 @@ public class PlayerFragment extends Fragment implements
     private MediaPlayer mMediaPlayer;
     private Song mSong;
     private SeekBar mSeekBar;
+    private int mMusicPosition;
+    private Handler mHandler = new Handler();
 
     public PlayerFragment() {
     }
@@ -44,7 +46,7 @@ public class PlayerFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSong = getArguments().getParcelable(ARGUMENT_SONG_KEY);
-        setRetainInstance(true);
+        setRetainInstance(true); // set fragment retaining to prevent media player recreation
     }
 
     private void releaseMP() {
@@ -70,8 +72,9 @@ public class PlayerFragment extends Fragment implements
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (mMediaPlayer != null && b){
-                    mMediaPlayer.seekTo(i * 1000);
+                if (mMediaPlayer != null && b) {
+                    mMusicPosition = i * 1000;
+                    mMediaPlayer.seekTo(mMusicPosition);
                 }
             }
 
@@ -86,16 +89,15 @@ public class PlayerFragment extends Fragment implements
 
         mSeekBar.setMax(mSong.getTrackTimeMillis() / 10000);
         mButton = (Button) v.findViewById(R.id.button);
+        boolean isPlaying = mMediaPlayer != null && mMediaPlayer.isPlaying();
+        mButton.setText(isPlaying ? R.string.pause : R.string.start);
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mButton.getText().toString().equals("Старт")) {
-                    releaseMP();
-                    startMusic(mSong.getPreviewUrl());
-                    mButton.setText("Пауза");
+                if (mButton.getText().toString().equals(getString(R.string.start))) {
+                    startOrResume();
                 } else {
-                    mButton.setText("Старт");
-                    if (mMediaPlayer != null && mMediaPlayer.isPlaying()) mMediaPlayer.pause();
+                    pause();
                 }
             }
         });
@@ -103,8 +105,26 @@ public class PlayerFragment extends Fragment implements
         songText.setText(mSong.getTrackName());
         artistText.setText(mSong.getArtistName());
 
-
         return v;
+    }
+
+    private void startOrResume() {
+        if (mMediaPlayer != null && mMusicPosition > 0) {
+            mMediaPlayer.seekTo(mMusicPosition);
+            mMediaPlayer.start();
+        } else {
+            releaseMP();
+            startMusic(mSong.getPreviewUrl());
+        }
+        mButton.setText(R.string.pause);
+    }
+
+    public void pause() {
+        mButton.setText(R.string.start);
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+            mMusicPosition = mMediaPlayer.getCurrentPosition();
+        }
     }
 
     public void startMusic(String uri) {
@@ -125,36 +145,30 @@ public class PlayerFragment extends Fragment implements
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        mButton.setText("Старт");
+        mButton.setText(R.string.start);
         mSeekBar.setProgress(0);
+        mMusicPosition = 0;
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+    public void release() {
         releaseMP();
+        mHandler.removeCallbacks(null);
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
-        final Handler mHandler = new Handler();
+        getActivity().runOnUiThread(mSongPositionRunnable);
+    }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mMediaPlayer != null && mMediaPlayer.isPlaying()){
-                    int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000;
-                    mSeekBar.setProgress(mCurrentPosition);
-                }
-                mHandler.postDelayed(this, 1000);
+    private Runnable mSongPositionRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mMediaPlayer != null && mMediaPlayer.isPlaying()){
+                int mCurrentPosition = mMediaPlayer.getCurrentPosition() / 1000;
+                mSeekBar.setProgress(mCurrentPosition);
             }
-        });
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        releaseMP();
-    }
+            mHandler.postDelayed(this, 500);
+        }
+    };
 }

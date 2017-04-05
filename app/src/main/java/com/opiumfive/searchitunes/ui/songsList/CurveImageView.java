@@ -55,6 +55,7 @@ public class CurveImageView extends AppCompatImageView {
     }
 
     private void prepareMask(int width, int height) {
+        width = (int) (width * 3.2f);
         mMaskBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(mMaskBitmap);
         canvas.drawARGB(0, 255, 255, 255);
